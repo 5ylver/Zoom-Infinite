@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/comma-dangle */
 import { useEffect } from "react";
-import { arkadia0, arkadia1, arkadia2, arkadia3, arkadia4 } from "./assets";
+
+import imagesData from "./imagesData";
 
 function App() {
   useEffect(() => {
-    let currentZoom = 1;
-
     const minZoom = 1;
     const maxZoom = 2.04;
     const stepSize = 0.05;
 
+    let currentZoom = 1;
     let srcCurrent = "img-1";
 
-    const container = document.getElementById("image-container");
+    const container = document.getElementById("img-container") as HTMLElement;
 
     const zoomImage = (direction: number) => {
       const newZoom = currentZoom + direction * stepSize;
@@ -20,19 +21,36 @@ function App() {
         srcCurrent
       ) as HTMLImageElement;
 
+      const getIndex = +srcCurrent.slice(4);
+
       if (newZoom < minZoom) {
         console.log("prev img");
+
+        if (getIndex === 1) return;
+
+        const newIndex = getIndex - 1;
+
+        srcCurrent = srcCurrent.slice(0, 4) + newIndex;
+
+        const imgPrev = window.document.getElementById(
+          srcCurrent
+        ) as HTMLImageElement;
+
+        imgCurrent.style.display = "none";
+
+        imgPrev.style.display = "block";
+
+        currentZoom = 2.04;
+
         return;
       }
 
       if (newZoom > maxZoom) {
         console.log("next img");
 
-        const getIndex = srcCurrent.slice(4);
-
-        if (+getIndex === 5) return;
-
         const newIndex = +getIndex + 1;
+
+        if (+getIndex === imagesData.length) return;
 
         srcCurrent = srcCurrent.slice(0, 4) + newIndex;
 
@@ -55,54 +73,31 @@ function App() {
       image.style.transform = "scale(" + currentZoom + ")";
     };
 
-    if (container != null) {
-      container.addEventListener("wheel", function (event) {
-        const direction = event.deltaY > 0 ? -1 : 1;
-        zoomImage(direction);
-      });
-    }
+    container.addEventListener("wheel", function (event) {
+      const direction = event.deltaY > 0 ? -1 : 1;
+      zoomImage(direction);
+    });
   }, []);
 
   return (
     <div
       style={{ width: "100vw", height: "100vh", overflow: "hidden" }}
-      id="image-container"
+      id="img-container"
     >
-      <img
-        src={arkadia0}
-        id="img-1"
-        style={{ width: "100%", height: "100%" }}
-        draggable="false"
-        alt="img"
-      />
-      <img
-        src={arkadia1}
-        id="img-2"
-        style={{ width: "100%", height: "100%", display: "none" }}
-        draggable="false"
-        alt="img-2"
-      />
-      <img
-        src={arkadia2}
-        id="img-3"
-        style={{ width: "100%", height: "100%", display: "none" }}
-        draggable="false"
-        alt="img-3"
-      />
-      <img
-        src={arkadia3}
-        id="img-4"
-        style={{ width: "100%", height: "100%", display: "none" }}
-        draggable="false"
-        alt="img-4"
-      />
-      <img
-        src={arkadia4}
-        id="img-5"
-        style={{ width: "100%", height: "100%", display: "none" }}
-        draggable="false"
-        alt="img-4"
-      />
+      {imagesData.map((src, index) => (
+        <img
+          key={`img-${index}`}
+          src={src}
+          id={`img-${index + 1}`}
+          className={index === 0 ? "" : "hidden"}
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+          draggable="false"
+          alt={`img-${index + 1}`}
+        />
+      ))}
     </div>
   );
 }
